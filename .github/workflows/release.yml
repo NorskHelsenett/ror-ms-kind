@@ -1,83 +1,68 @@
-name: Build ms-kind
+name: Release API
 
 on:
   push:
-    branches:
-      - main
-    # Publish semver tags as releases.
-    #tags: [ 'v*.*.*' ]
-  pull_request:
-    branches:
-      - main
-
+    tags: ["v[0-9]+", "v[0-9]+.[0-9]+", "v[0-9]+.[0-9]+.[0-9]+", "v[0-9]+.[0-9]+.[0-9]+-*"]
 
 env:
-  # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
-  # github.repository as <account>/<repo>
-  # test
   IMAGE_NAME: norskhelsenett/ror-ms-kind
-  GH_TOKEN: ${{ secrets.VARTOKEN }}
+  APP: ror-ms-kind
+  APP_PATH: cmd/ror-ms-kind
 
 jobs:
-  bump-version:
+  setenv:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     outputs:
-      ror_version: ${{ steps.set_version.outputs.ror_version }}
+      rorversion: ${{ steps.env.outputs.ROR_VERSION }}
+      shortsha: ${{ steps.env.outputs.SHA_SHORT }}
+      libver: ${{ steps.env.outputs.LIB_VER }}
     steps:
-      - uses: actions/checkout@v4
-      - id: set_version
+      - uses: actions/checkout@v3
+      - id: env
+        name: Set env
         run: |
-            PREV_VERSION=$(gh variable get V1VERSION)
-            ROR_VERSION=$(echo $PREV_VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
-            echo "ror_version=$ROR_VERSION" >> "$GITHUB_OUTPUT"
-            gh variable set V1VERSION --body $ROR_VERSION
-            echo "version bumped from $PREV_VERSION to $ROR_VERSION"
+          echo "ROR_VERSION=${GITHUB_REF#refs/*/}" >> "$GITHUB_OUTPUT"
+          echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          echo "LIB_VER=$(cat go.mod | grep 'github.com/NorskHelsenett/ror ' | cut -d' ' -f2)" >> "$GITHUB_OUTPUT"
   build-app:
+    if: github.ref_type == 'tag'
+    needs: setenv
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
-    needs: bump-version
     steps:
-    - uses: actions/checkout@v3
-
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.23'
-    - name: Cache Go modules
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.cache/go-build
-          ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
-    - name: Build
-      run: |
-        echo $ROR_VERSION
-        go get ./...
-        mkdir -p dist/isbuilt
-        CGO_ENABLED=0 go build -o dist/ms-kind -ldflags "-w -extldflags '-static' -X internal/kindconfig.version=$ROR_VERSION -X internal/kindconfig.commit=$CI_COMMIT_SHORT_SHA" cmd/ms-kind/main.go
-        touch dist/isbuilt/ms-kind
-      env:
-        ROR_VERSION: ${{ needs.bump-version.outputs.ror_version }}
-
-    - name: Archive binary
-      uses: actions/upload-artifact@v4
-      with:
-        name: binary-build
-        path: |
-          dist/ms-kind
-          dist/isbuilt/ms-kind
-        retention-days: 1
-
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.23"
+      - name: Start build
+        run: |
+          echo "Building ${{ env.APP }} ${{ needs.setenv.outputs.rorversion}} (${{ needs.setenv.outputs.shortsha}})"
+      - name: Build
+        run: |
+          go get ./...
+          mkdir -p dist/isbuilt
+          CGO_ENABLED=0 go build -o dist/${{ env.APP }} -ldflags "-w -extldflags '-static' -X github.com/NorskHelsenett/ror/pkg/config/rorversion.Version=${{ needs.setenv.outputs.rorversion}} -X github.com/NorskHelsenett/ror/pkg/config/rorversion.Commit=${{ needs.setenv.outputs.shortsha}} -X github.com/NorskHelsenett/ror/pkg/config/rorversion.LibVer=${{ needs.setenv.outputs.libver}}" ${{ env.APP_PATH }}/main.go
+          touch dist/isbuilt/${{ env.APP }}
+      - name: Archive binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-build
+          path: |
+            dist/${{ env.APP }}
+            dist/isbuilt/${{ env.APP }}
+          retention-days: 1
 
   build-container-image:
     runs-on: ubuntu-latest
-    #if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
-    needs: 
+    if: github.ref_type == 'tag'
+    needs:
       - build-app
-      - bump-version
+      - setenv
     permissions:
       contents: read
       packages: write
@@ -89,16 +74,19 @@ jobs:
 
       - name: Download binary build artifacts
         uses: actions/download-artifact@v4
-
+      - name: Check env
+        run: |
+          echo "Building container ${{ env.APP }} ${{ needs.setenv.outputs.rorversion}} (${{ needs.setenv.outputs.shortsha}})"
       - name: Move artifacts
         run: |
           mv binary-build dist
+          chmod +x dist/${{ env.APP }}
 
       - name: Install cosign
         if: github.event_name != 'pull_request'
         uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 #v3.5.0
         with:
-          cosign-release: 'v2.2.4'
+          cosign-release: "v2.2.4"
 
       # Set up BuildKit Docker container builder to be able to build
       # multi-platform images and export cache
@@ -125,9 +113,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest
-            type=raw,value=${{ env.ROR_VERSION }}
-        env:
-          ROR_VERSION: ${{ needs.bump-version.outputs.ror_version }}
+            type=raw,value=${{ needs.setenv.outputs.rorversion }}
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
@@ -156,3 +142,4 @@ jobs:
         # This step uses the identity token to provision an ephemeral certificate
         # against the sigstore community Fulcio instance.
         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+  
