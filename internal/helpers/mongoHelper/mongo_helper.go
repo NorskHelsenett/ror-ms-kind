@@ -5,11 +5,10 @@ import (
 	"fmt"
 
 	"github.com/NorskHelsenett/ror/pkg/apicontracts"
+	"github.com/NorskHelsenett/ror/pkg/models/aclmodels"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-
-	aclmodels "github.com/NorskHelsenett/ror/pkg/models/acl"
 )
 
 var (

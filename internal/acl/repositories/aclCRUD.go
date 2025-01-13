@@ -9,7 +9,7 @@ import (
 
 	"github.com/NorskHelsenett/ror/pkg/apicontracts"
 
-	aclmodels "github.com/NorskHelsenett/ror/pkg/models/acl"
+	"github.com/NorskHelsenett/ror/pkg/models/aclmodels"
 
 	"github.com/NorskHelsenett/ror/pkg/clients/mongodb"
 

@@ -15,9 +15,8 @@ import (
 
 	"github.com/NorskHelsenett/ror/pkg/messagebuscontracts"
 
+	"github.com/NorskHelsenett/ror/pkg/models/aclmodels"
 	identitymodels "github.com/NorskHelsenett/ror/pkg/models/identity"
-
-	aclmodels "github.com/NorskHelsenett/ror/pkg/models/acl"
 
 	"github.com/NorskHelsenett/ror/pkg/apicontracts"
 	"github.com/NorskHelsenett/ror/pkg/helpers/rorerror"

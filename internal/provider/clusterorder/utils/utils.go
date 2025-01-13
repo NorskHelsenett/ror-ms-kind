@@ -15,10 +15,9 @@ import (
 	projectservice "github.com/NorskHelsenett/ror-ms-kind/internal/services/projectsService"
 	resourcesservice "github.com/NorskHelsenett/ror-ms-kind/internal/services/resourcesService"
 
-	aclmodels "github.com/NorskHelsenett/ror/pkg/models/acl"
-
 	"github.com/NorskHelsenett/ror/pkg/apicontracts"
 	"github.com/NorskHelsenett/ror/pkg/apicontracts/apiresourcecontracts"
+	"github.com/NorskHelsenett/ror/pkg/models/aclmodels"
 
 	"github.com/NorskHelsenett/ror/pkg/rlog"
 

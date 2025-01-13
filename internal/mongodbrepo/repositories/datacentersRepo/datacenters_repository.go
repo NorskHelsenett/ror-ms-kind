@@ -8,6 +8,7 @@ import (
 	mongoHelper "github.com/NorskHelsenett/ror-ms-kind/internal/helpers/mongoHelper"
 	"github.com/NorskHelsenett/ror-ms-kind/internal/mongodbrepo/mongoTypes"
 
+	"github.com/NorskHelsenett/ror/pkg/models/aclmodels"
 	identitymodels "github.com/NorskHelsenett/ror/pkg/models/identity"
 
 	"github.com/NorskHelsenett/ror/pkg/apicontracts"
@@ -17,8 +18,6 @@ import (
 	"github.com/NorskHelsenett/ror/pkg/rlog"
 
 	aclrepo "github.com/NorskHelsenett/ror-ms-kind/internal/acl/repositories"
-
-	aclmodels "github.com/NorskHelsenett/ror/pkg/models/acl"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

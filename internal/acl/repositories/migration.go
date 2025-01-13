@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	aclmodels "github.com/NorskHelsenett/ror/pkg/models/acl"
+	"github.com/NorskHelsenett/ror/pkg/models/aclmodels"
 
 	"github.com/NorskHelsenett/ror/pkg/clients/mongodb"
 

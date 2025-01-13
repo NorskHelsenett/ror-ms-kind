@@ -12,6 +12,7 @@ import (
 	"github.com/NorskHelsenett/ror-ms-kind/internal/mongodbrepo/mongoTypes"
 
 	"github.com/NorskHelsenett/ror/pkg/config/configconsts"
+	"github.com/NorskHelsenett/ror/pkg/models/aclmodels"
 
 	"github.com/NorskHelsenett/ror/pkg/apicontracts"
 
@@ -21,8 +22,6 @@ import (
 
 	aclrepo "github.com/NorskHelsenett/ror-ms-kind/internal/acl/repositories"
 	workspacesRepo "github.com/NorskHelsenett/ror-ms-kind/internal/mongodbrepo/repositories/workspacesRepo"
-
-	aclmodels "github.com/NorskHelsenett/ror/pkg/models/acl"
 
 	"github.com/spf13/viper"
 	"go.opentelemetry.io/otel"

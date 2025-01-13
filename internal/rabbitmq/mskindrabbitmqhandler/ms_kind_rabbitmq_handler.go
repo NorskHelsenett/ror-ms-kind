@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+
 	"github.com/NorskHelsenett/ror-ms-kind/internal/mskindconnections"
 	"github.com/NorskHelsenett/ror-ms-kind/internal/rabbitmq/mskindrabbitmqdefinitions"
 	"github.com/NorskHelsenett/ror-ms-kind/internal/rorclient"
@@ -11,11 +12,10 @@ import (
 
 	"strings"
 
-	aclmodels "github.com/NorskHelsenett/ror/pkg/models/acl"
-
 	"github.com/NorskHelsenett/ror/pkg/apicontracts/apiresourcecontracts"
 	"github.com/NorskHelsenett/ror/pkg/handlers/rabbitmqhandler"
 	"github.com/NorskHelsenett/ror/pkg/messagebuscontracts"
+	"github.com/NorskHelsenett/ror/pkg/models/aclmodels"
 	"github.com/NorskHelsenett/ror/pkg/models/providers"
 	"github.com/rabbitmq/amqp091-go"
 

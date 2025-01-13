@@ -10,14 +10,13 @@ import (
 	"github.com/NorskHelsenett/ror-ms-kind/internal/mongodbrepo/mongoTypes"
 
 	"github.com/NorskHelsenett/ror/pkg/apicontracts"
+	"github.com/NorskHelsenett/ror/pkg/models/aclmodels"
 
 	"github.com/NorskHelsenett/ror/pkg/clients/mongodb"
 
 	"github.com/NorskHelsenett/ror/pkg/rlog"
 
 	aclrepo "github.com/NorskHelsenett/ror-ms-kind/internal/acl/repositories"
-
-	aclmodels "github.com/NorskHelsenett/ror/pkg/models/acl"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
